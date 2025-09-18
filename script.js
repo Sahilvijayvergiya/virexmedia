@@ -40,6 +40,41 @@ document.querySelectorAll(".faq-question").forEach(q => {
 // Contact form submission
 document.getElementById("contactForm").addEventListener("submit", function(e) {
   e.preventDefault();
-  document.getElementById("formMsg").textContent = "Thank you! We will connect with you soon.";
-  this.reset();
+  
+  const formData = new FormData(this);
+  const submitButton = this.querySelector('button[type="submit"]');
+  const formMsg = document.getElementById("formMsg");
+  
+  // Disable submit button and show loading
+  submitButton.disabled = true;
+  submitButton.textContent = "Sending...";
+  formMsg.textContent = "";
+  
+  // Submit to Formspree
+  fetch(this.action, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      formMsg.textContent = "Thank you! We will connect with you soon.";
+      formMsg.style.color = "#4CAF50";
+      this.reset();
+    } else {
+      throw new Error('Network response was not ok');
+    }
+  })
+  .catch(error => {
+    formMsg.textContent = "Sorry, there was an error sending your message. Please try again or contact us directly.";
+    formMsg.style.color = "#f44336";
+    console.error('Error:', error);
+  })
+  .finally(() => {
+    // Re-enable submit button
+    submitButton.disabled = false;
+    submitButton.textContent = "Send";
+  });
 });
